@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Forecasting Studio{% endblock %} | Time Series Analyst</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Plotly.js CDN for high-performance interactive scientific charts -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-800">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/95">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand Logo -->
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'dashboard' %}" class="flex items-center gap-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform duration-200">
+                            <i data-lucide="line-chart" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <span class="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Forecasting Studio</span>
+                            <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[11px] font-semibold bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">Analyst Edition</span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center gap-1 font-medium text-sm text-slate-600">
+                    <a href="{% url 'dashboard' %}" class="px-3 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if request.resolver_match.url_name == 'dashboard' %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
+                        Dashboard
+                    </a>
+                    <a href="{% url 'dataset_list' %}" class="px-3 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if 'dataset' in request.resolver_match.url_name %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
+                        Datasets
+                    </a>
+                    <a href="{% url 'run_compare' %}" class="px-3 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if request.resolver_match.url_name == 'run_compare' %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
+                        Compare Runs
+                    </a>
+                </nav>
+
+                <!-- Quick Actions -->
+                <div class="flex items-center gap-2.5">
+                    <form action="{% url 'load_sample_datasets' %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" title="Load Monthly India Electricity and Multivariate Macro samples" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-xs">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i>
+                            <span>Load Samples</span>
+                        </button>
+                    </form>
+                    <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200">
+                        <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        <span>Upload Data</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Notifications / Messages -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% for message in messages %}
+        <div class="p-3.5 rounded-xl border flex items-center gap-3 text-sm mb-2 shadow-xs transition-all duration-300 {% if message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% elif message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-800{% else %}bg-indigo-50 border-indigo-200 text-indigo-800{% endif %}">
+            {% if message.tags == 'error' %}
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 shrink-0"></i>
+            {% elif message.tags == 'success' %}
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+            {% else %}
+            <i data-lucide="info" class="w-5 h-5 text-indigo-600 shrink-0"></i>
+            {% endif %}
+            <span class="flex-1 font-medium">{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-slate-500 text-xs text-center">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-700">Forecasting Studio</span>
+                <span>&bull;</span>
+                <span>Univariate (SARIMA) & Multivariate (VAR) Diagnostic Intelligence</span>
+            </div>
+            <div class="flex items-center gap-4 text-slate-400">
+                <span>Monthly India Electricity Benchmark Example</span>
+                <span>&bull;</span>
+                <span>Django MVT + Statsmodels</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

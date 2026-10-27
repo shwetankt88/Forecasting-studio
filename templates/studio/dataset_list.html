@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Datasets | Forecasting Studio{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Time Series Datasets</h1>
+            <p class="text-xs sm:text-sm text-slate-500">Manage uploaded CSV/Excel files and canonical benchmark datasets</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <form action="{% url 'load_sample_datasets' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <span>Reload Benchmark Samples</span>
+                </button>
+            </form>
+            <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-xs">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                <span>Upload New Dataset</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for ds in datasets %}
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:border-indigo-200 transition-all flex flex-col justify-between">
+            <div>
+                <div class="flex items-start justify-between gap-2 mb-2">
+                    <h3 class="text-sm font-bold text-slate-900 hover:text-indigo-600">
+                        <a href="{% url 'dataset_detail' ds.pk %}">{{ ds.name }}</a>
+                    </h3>
+                    {% if ds.is_sample %}
+                    <span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                        Sample
+                    </span>
+                    {% endif %}
+                </div>
+                <p class="text-xs text-slate-500 line-clamp-3 mb-4 leading-relaxed">{{ ds.description|default:"No description provided." }}</p>
+                
+                <div class="bg-slate-50 rounded-xl p-3 mb-4 space-y-1.5 text-xs text-slate-600">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Rows:</span>
+                        <span class="font-semibold text-slate-700">{{ ds.rows_count }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">File Type:</span>
+                        <span class="font-mono font-semibold uppercase text-slate-700">{{ ds.file_type }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Columns:</span>
+                        <span class="font-semibold text-slate-700">{{ ds.columns|length }} detected</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                <a href="{% url 'dataset_detail' ds.pk %}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                    <span>Inspect</span> <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </a>
+                <div class="flex items-center gap-1.5">
+                    <a href="{% url 'univariate_create' ds.pk %}" class="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors">
+                        Mode A
+                    </a>
+                    {% if ds.columns|length >= 2 %}
+                    <a href="{% url 'multivariate_create' ds.pk %}" class="px-2.5 py-1 text-xs font-semibold rounded-md bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors">
+                        Mode B
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200/80 p-8">
+            <i data-lucide="database" class="w-10 h-10 text-slate-300 mx-auto mb-2"></i>
+            <h3 class="text-sm font-bold text-slate-800">No datasets yet</h3>
+            <p class="text-xs text-slate-500 mb-4">Click "Reload Benchmark Samples" to get started instantly.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

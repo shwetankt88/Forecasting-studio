@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ dataset.name }} | Forecasting Studio{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumb & Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                <a href="{% url 'dashboard' %}" class="hover:text-indigo-600">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'dataset_list' %}" class="hover:text-indigo-600">Datasets</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold truncate max-w-xs">{{ dataset.name }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ dataset.name }}</h1>
+                {% if dataset.is_sample %}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    Canonical Benchmark
+                </span>
+                {% endif %}
+            </div>
+            <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">{{ dataset.description }}</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            <a href="{% url 'univariate_create' dataset.pk %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm shadow-indigo-200">
+                <i data-lucide="trending-up" class="w-4 h-4"></i>
+                <span>Mode A: Univariate Report</span>
+            </a>
+            {% if dataset.columns|length >= 2 %}
+            <a href="{% url 'multivariate_create' dataset.pk %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-200">
+                <i data-lucide="network" class="w-4 h-4"></i>
+                <span>Mode B: Multivariate VAR</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Observations</div>
+            <div class="text-lg font-bold text-slate-900">{{ dataset.rows_count }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Detected Columns</div>
+            <div class="text-lg font-bold text-slate-900">{{ dataset.columns|length }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Format</div>
+            <div class="text-lg font-bold uppercase text-slate-900 font-mono">{{ dataset.file_type }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Uploaded Date</div>
+            <div class="text-sm font-semibold text-slate-700 pt-1">{{ dataset.uploaded_at|date:"M d, Y" }}</div>
+        </div>
+    </div>
+
+    <!-- Detected Columns Schema -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+        <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+            <i data-lucide="columns-3" class="w-4 h-4 text-indigo-600"></i>
+            <span>Columns Schema & Detected Types</span>
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+            {% for col in dataset.columns %}
+            <div class="p-3 rounded-xl border border-slate-100 bg-slate-50/50">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="font-bold text-xs text-slate-800 font-mono">{{ col.name }}</span>
+                    <span class="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded {% if col.type == 'date' %}bg-purple-100 text-purple-700{% elif col.type == 'float' or col.type == 'numeric' %}bg-blue-100 text-blue-700{% else %}bg-slate-200 text-slate-700{% endif %}">
+                        {{ col.type }}
+                    </span>
+                </div>
+                {% if col.sample %}
+                <div class="text-[11px] text-slate-500 truncate">Sample: <code class="text-slate-700 font-mono">{{ col.sample }}</code></div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Data Preview Table (First 10 rows) -->
+    {% if preview_rows %}
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i>
+                <span>Raw Data Preview (First 10 rows)</span>
+            </h3>
+            <span class="text-xs text-slate-400">Total: {{ dataset.rows_count }} records</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+                <thead class="bg-slate-50/80 text-slate-600 font-semibold uppercase border-b border-slate-100">
+                    <tr>
+                        {% for col in preview_cols %}
+                        <th class="px-4 py-2.5 whitespace-nowrap">{{ col }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-mono">
+                    {% for row in preview_rows %}
+                    <tr class="hover:bg-slate-50/50">
+                        {% for col in preview_cols %}
+                        <td class="px-4 py-2 text-slate-700 whitespace-nowrap">
+                            {{ row|dictsort:col|first|default:row }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Associated Past Runs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Univariate Runs on this dataset -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-indigo-600"></i>
+                    <span>Mode A Univariate Runs</span>
+                </h3>
+                <a href="{% url 'univariate_create' dataset.pk %}" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ New Run</a>
+            </div>
+            {% if univariate_runs %}
+            <div class="divide-y divide-slate-100 text-xs">
+                {% for r in univariate_runs %}
+                <div class="py-2.5 flex items-center justify-between gap-2">
+                    <div>
+                        <a href="{% url 'univariate_detail' r.pk %}" class="font-bold text-slate-800 hover:text-indigo-600">
+                            {{ r.run_name }}
+                        </a>
+                        <div class="text-[11px] text-slate-400">{{ r.target_column }} &bull; {{ r.created_at|date:"M d, H:i" }}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {{ r.best_candidate.model_name|default:"Evaluated" }}
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-400 py-4 text-center">No univariate runs yet. Click "Mode A: Univariate Report" to execute.</p>
+            {% endif %}
+        </div>
+
+        <!-- Multivariate Runs on this dataset -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="network" class="w-4 h-4 text-sky-600"></i>
+                    <span>Mode B Multivariate Runs</span>
+                </h3>
+                {% if dataset.columns|length >= 2 %}
+                <a href="{% url 'multivariate_create' dataset.pk %}" class="text-xs font-semibold text-sky-600 hover:text-sky-800">+ New Run</a>
+                {% endif %}
+            </div>
+            {% if multivariate_runs %}
+            <div class="divide-y divide-slate-100 text-xs">
+                {% for r in multivariate_runs %}
+                <div class="py-2.5 flex items-center justify-between gap-2">
+                    <div>
+                        <a href="{% url 'multivariate_detail' r.pk %}" class="font-bold text-slate-800 hover:text-sky-600">
+                            {{ r.run_name }}
+                        </a>
+                        <div class="text-[11px] text-slate-400">{{ r.target_columns|join:", " }}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                        VAR(lag={{ r.lag_order }})
+                    </span>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-xs text-slate-400 py-4 text-center">No multivariate runs yet. Click "Mode B: Multivariate VAR" to execute.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,354 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ run.run_name }} | Mode B Multivariate System{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
+                <a href="{% url 'dashboard' %}" class="hover:text-indigo-600">Dashboard</a>
+                <span>/</span>
+                <a href="{% url 'dataset_detail' run.dataset.pk %}" class="hover:text-indigo-600 truncate max-w-xs">{{ run.dataset.name }}</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold">{{ run.run_name }}</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{{ run.run_name }}</h1>
+                <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-sky-50 text-sky-700 border border-sky-200">
+                    {{ run.model_type }}(lag={{ run.lag_order }})
+                </span>
+            </div>
+            <div class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-2">
+                <span>Variables: <strong class="text-slate-700 font-mono">{{ run.target_columns|join:", " }}</strong></span>
+                <span>&bull;</span>
+                <span>AIC: <strong class="text-slate-700">{{ run.metrics.aic|floatformat:1 }}</strong></span>
+                <span>&bull;</span>
+                <span>BIC: <strong class="text-slate-700">{{ run.metrics.bic|floatformat:1 }}</strong></span>
+                <span>&bull;</span>
+                <span>Executed: {{ run.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a href="{% url 'multivariate_export' run.pk %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Download Joint Forecast (CSV)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Top Card: Mode B Plain-Language Summary Box -->
+    <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 rounded-2xl p-6 sm:p-7 text-white shadow-lg border border-sky-800/40 relative overflow-hidden">
+        <div class="flex items-center gap-2 text-sky-300 text-xs font-bold uppercase tracking-wider mb-2.5">
+            <i data-lucide="sparkles" class="w-4 h-4 text-sky-400"></i>
+            <span>Mode B System Insight Summary</span>
+        </div>
+        <p class="text-base sm:text-lg text-slate-100 font-medium leading-relaxed max-w-4xl">
+            &ldquo;{{ run.summary_text }}&rdquo;
+        </p>
+    </div>
+
+    <!-- Guardrails -->
+    <div class="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-5 text-amber-950 shadow-xs">
+        <div class="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-800 mb-3">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+            <span>Mode B Guardrails: What VAR Will NOT Tell You</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-amber-900/90">
+            {% for warn in run.warnings %}
+            <div class="bg-white/80 p-3 rounded-xl border border-amber-200/60">
+                <div class="font-bold text-amber-950 mb-1 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    {{ warn.title }}
+                </div>
+                <p class="leading-relaxed text-slate-600">{{ warn.desc }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 1. CORRELATION & CO-MOVEMENT -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+        <div class="pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+                <h2 class="text-lg font-bold text-slate-900">Do these series move together?</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Correlation matrix heatmap and normalized standardized co-movement paths</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Heatmap -->
+            <div class="lg:col-span-5">
+                <div class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pearson Correlation Matrix</div>
+                <div id="corr_heatmap" class="w-full h-72 rounded-xl bg-slate-50/50"></div>
+            </div>
+            <!-- Normalized Overlay -->
+            <div class="lg:col-span-7">
+                <div class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Normalized Co-movement Overlay (Z-Scores)</div>
+                <div id="comovement_chart" class="w-full h-72 rounded-xl bg-slate-50/50"></div>
+            </div>
+        </div>
+
+        <!-- Correlation insights callout -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-700 space-y-1">
+            <div class="font-bold text-slate-900">Co-movement Findings:</div>
+            {% for ins in run.correlation_matrix.insights %}
+            <div>&bull; {{ ins }}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 2. GRANGER CAUSALITY -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+        <div class="pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">2</span>
+                <h2 class="text-lg font-bold text-slate-900">Does A help predict B? (Granger Causality)</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Statistical test evaluating whether past values of series A contain information that helps forecast series B above and beyond B's own past</p>
+        </div>
+
+        <!-- Pairwise Granger Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for test in run.granger_causality.pairwise_tests %}
+            <div class="p-4 rounded-xl border {% if test.is_significant %}bg-emerald-50/60 border-emerald-200{% elif test.is_marginal %}bg-amber-50/60 border-amber-200{% else %}bg-slate-50/70 border-slate-200/80{% endif %}">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="font-bold text-xs font-mono text-slate-900 flex items-center gap-1.5">
+                        <span>{{ test.cause }}</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span>{{ test.effect }}</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {% if test.is_significant %}bg-emerald-100 text-emerald-800{% elif test.is_marginal %}bg-amber-100 text-amber-800{% else %}bg-slate-200 text-slate-700{% endif %}">
+                        {% if test.is_significant %}Granger Causes{% elif test.is_marginal %}Marginal Signal{% else %}No Signal{% endif %}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-700 leading-relaxed">{{ test.verdict }}</p>
+                <div class="text-[11px] font-mono text-slate-500 mt-2">p-value: {{ test.p_value|floatformat:4 }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 3. IMPULSE RESPONSE FUNCTIONS (IRF) -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+        <div class="pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+                <h2 class="text-lg font-bold text-slate-900">How long does a shock last? (Impulse Response)</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Traces the dynamic response of each variable over time following a 1-standard-deviation orthogonal shock in another variable</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-sky-50 border border-sky-100 text-xs text-sky-950 space-y-1">
+            <div class="font-bold">Dynamic Shock Propagation Insights:</div>
+            {% for narr in run.irf_data.narratives %}
+            <div>&bull; {{ narr }}</div>
+            {% endfor %}
+        </div>
+
+        <div id="irf_chart" class="w-full h-80 rounded-xl bg-slate-50/50"></div>
+    </div>
+
+    <!-- 4. FORECAST ERROR VARIANCE DECOMPOSITION (FEVD) -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+        <div class="pb-4 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">4</span>
+                <h2 class="text-lg font-bold text-slate-900">What drives the uncertainty? (FEVD)</h2>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Measures the percentage contribution of each shock to the forecast error variance of each variable across future horizons</p>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-indigo-50 border border-indigo-100 text-xs text-indigo-950 space-y-1">
+            <div class="font-bold">Uncertainty Drivers:</div>
+            {% for ins in run.fevd_data.insights %}
+            <div>&bull; {{ ins }}</div>
+            {% endfor %}
+        </div>
+
+        <div id="fevd_chart" class="w-full h-80 rounded-xl bg-slate-50/50"></div>
+    </div>
+
+    <!-- 5. JOINT FORECASTS -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="w-6 h-6 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center">5</span>
+                    <h2 class="text-lg font-bold text-slate-900">What are the joint forecasts?</h2>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">Coordinated multi-step forecasts for all variables with 95% confidence bands</p>
+            </div>
+            <a href="{% url 'multivariate_export' run.pk %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold shadow-xs">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                <span>Export Joint CSV</span>
+            </a>
+        </div>
+
+        <div id="joint_forecast_chart" class="w-full h-96 rounded-xl bg-slate-50/50"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const mData = JSON.parse('{{ multi_json|escapejs }}');
+
+    const defaultLayout = {
+        margin: { t: 30, r: 20, b: 40, l: 50 },
+        hovermode: 'closest',
+        font: { family: 'Plus Jakarta Sans, sans-serif', size: 11, color: '#475569' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        xaxis: { gridcolor: '#f1f5f9', zeroline: false },
+        yaxis: { gridcolor: '#f1f5f9', zeroline: false }
+    };
+
+    // 1. Correlation Heatmap
+    if (mData.corr && mData.corr.matrix) {
+        Plotly.newPlot('corr_heatmap', [{
+            z: mData.corr.matrix,
+            x: mData.corr.variables,
+            y: mData.corr.variables,
+            type: 'heatmap',
+            colorscale: 'Blues',
+            zmin: -1,
+            zmax: 1
+        }], {
+            ...defaultLayout,
+            margin: { t: 20, r: 20, b: 60, l: 80 }
+        }, { responsive: true, displayModeBar: false });
+    }
+
+    // 2. Co-movement Plot
+    if (mData.history && mData.history.normalized) {
+        const traces = [];
+        const colors = ['#4f46e5', '#0284c7', '#10b981', '#f59e0b', '#ec4899'];
+        let cIdx = 0;
+        for (const [vName, zValues] of Object.entries(mData.history.normalized)) {
+            traces.push({
+                x: mData.history.dates,
+                y: zValues,
+                type: 'scatter',
+                mode: 'lines',
+                line: { width: 1.8, color: colors[cIdx % colors.length] },
+                name: vName
+            });
+            cIdx++;
+        }
+        Plotly.newPlot('comovement_chart', traces, {
+            ...defaultLayout,
+            yaxis: { ...defaultLayout.yaxis, title: 'Standardized Z-Score' },
+            legend: { orientation: 'h', y: 1.15 }
+        }, { responsive: true, displayModeBar: false });
+    }
+
+    // 3. IRF Chart
+    if (mData.irf && mData.irf.curves) {
+        const irfTraces = [];
+        const colors = ['#4f46e5', '#0284c7', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+        let idx = 0;
+        for (const [pairName, vals] of Object.entries(mData.irf.curves)) {
+            irfTraces.push({
+                x: mData.irf.steps,
+                y: vals,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { width: 1.8, color: colors[idx % colors.length] },
+                marker: { size: 4 },
+                name: pairName
+            });
+            idx++;
+        }
+        Plotly.newPlot('irf_chart', irfTraces, {
+            ...defaultLayout,
+            xaxis: { ...defaultLayout.xaxis, title: 'Horizon Steps After Shock' },
+            yaxis: { ...defaultLayout.yaxis, title: 'Orthogonal Response Magnitude', zeroline: true, zerolinecolor: '#cbd5e1' },
+            legend: { orientation: 'h', y: 1.2 }
+        }, { responsive: true, displayModeBar: false });
+    }
+
+    // 4. FEVD Chart
+    if (mData.fevd && mData.fevd.summary) {
+        const firstVar = Object.keys(mData.fevd.summary)[0];
+        const stepsData = mData.fevd.summary[firstVar] || [];
+        const horizons = Array.from({length: stepsData.length}, (_, i) => i + 1);
+
+        const fevdTraces = [];
+        const colors = ['#4f46e5', '#38bdf8', '#34d399', '#fbbf24'];
+        let fIdx = 0;
+
+        for (const impVar of mData.variables) {
+            const shares = stepsData.map(stepObj => stepObj[impVar] || 0);
+            fevdTraces.push({
+                x: horizons,
+                y: shares,
+                type: 'scatter',
+                mode: 'lines',
+                stackgroup: 'one',
+                fillcolor: colors[fIdx % colors.length] + '88',
+                line: { color: colors[fIdx % colors.length], width: 1.5 },
+                name: `Shock in ${impVar}`
+            });
+            fIdx++;
+        }
+
+        Plotly.newPlot('fevd_chart', fevdTraces, {
+            ...defaultLayout,
+            xaxis: { ...defaultLayout.xaxis, title: 'Forecast Horizon (Months)' },
+            yaxis: { ...defaultLayout.yaxis, title: `% Variance in ${firstVar}`, range: [0, 100] },
+            legend: { orientation: 'h', y: 1.15 }
+        }, { responsive: true, displayModeBar: false });
+    }
+
+    // 5. Joint Forecast Chart
+    if (mData.forecast && mData.forecast.series) {
+        const fcTraces = [];
+        const colors = ['#4f46e5', '#0284c7', '#10b981', '#f59e0b'];
+        let jIdx = 0;
+
+        for (const [colName, fcData] of Object.entries(mData.forecast.series)) {
+            const colColor = colors[jIdx % colors.length];
+            fcTraces.push({
+                x: mData.forecast.dates,
+                y: fcData.mean,
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: colColor, width: 2 },
+                marker: { size: 5 },
+                name: `${colName} Forecast`
+            });
+            fcTraces.push({
+                x: mData.forecast.dates,
+                y: fcData.upper_95,
+                type: 'scatter',
+                mode: 'lines',
+                line: { width: 0 },
+                showlegend: false,
+                hoverinfo: 'skip'
+            });
+            fcTraces.push({
+                x: mData.forecast.dates,
+                y: fcData.lower_95,
+                type: 'scatter',
+                mode: 'lines',
+                fill: 'tonexty',
+                fillcolor: colColor + '20',
+                line: { width: 0 },
+                name: `${colName} 95% Band`
+            });
+            jIdx++;
+        }
+
+        Plotly.newPlot('joint_forecast_chart', fcTraces, {
+            ...defaultLayout,
+            xaxis: { ...defaultLayout.xaxis, title: 'Forecast Dates' },
+            yaxis: { ...defaultLayout.yaxis, title: 'Forecast Level' },
+            legend: { orientation: 'h', y: 1.15 }
+        }, { responsive: true, displayModeBar: false });
+    }
+</script>
+{% endblock %}

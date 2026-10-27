@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Compare Runs | Forecasting Studio{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Run Comparison Studio</h1>
+            <p class="text-xs sm:text-sm text-slate-500">Compare multiple model runs on the same dataset side-by-side to determine which model performed best.</p>
+        </div>
+    </div>
+
+    <!-- Dataset Selector Form -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+        <form method="get" class="flex flex-wrap items-center gap-4 text-xs">
+            <div class="flex items-center gap-2">
+                <label class="font-bold text-slate-700 uppercase tracking-wider">Select Dataset:</label>
+                <select name="dataset" onchange="this.form.submit()" class="px-3 py-1.5 border border-slate-300 rounded-lg text-xs bg-white focus:ring-2 focus:ring-indigo-500 font-medium">
+                    {% for ds in datasets %}
+                    <option value="{{ ds.pk }}" {% if ds == selected_dataset %}selected{% endif %}>
+                        {{ ds.name }} ({{ ds.runs.count }} runs)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    {% if runs_to_compare %}
+    <!-- Side-by-Side Comparison Metrics Table -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="git-compare" class="w-4 h-4 text-indigo-600"></i>
+                <span>Side-by-Side Model Performance</span>
+            </h3>
+            <span class="text-xs text-slate-400">Comparing {{ runs_to_compare|length }} runs</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+                <thead class="bg-slate-50 text-slate-600 font-semibold uppercase border-b border-slate-100">
+                    <tr>
+                        <th class="px-4 py-3">Metric / Property</th>
+                        {% for r in runs_to_compare %}
+                        <th class="px-4 py-3 font-mono">
+                            <a href="{% url 'univariate_detail' r.pk %}" class="hover:text-indigo-600 underline">
+                                {{ r.run_name }}
+                            </a>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">Target Column</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-mono text-slate-800">{{ r.target_column }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">Best Selected Model</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-mono font-bold text-indigo-700">
+                            {{ r.best_candidate.model_name|default:"N/A" }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">Holdout RMSE</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-mono font-bold text-emerald-700">
+                            {{ r.best_candidate.rmse|floatformat:3|default:"N/A" }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">Holdout MAE</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-mono text-slate-700">
+                            {{ r.best_candidate.mae|floatformat:3|default:"N/A" }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">Holdout MAPE</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-mono text-slate-700">
+                            {{ r.best_candidate.mape|floatformat:2|default:"N/A" }}%
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">In-Sample AIC</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-mono text-slate-600">
+                            {{ r.best_candidate.aic|floatformat:1|default:"N/A" }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="px-4 py-2.5 font-bold text-slate-700">Residuals White Noise (Ljung-Box)</td>
+                        {% for r in runs_to_compare %}
+                        <td class="px-4 py-2.5 font-sans">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {% if r.q6_residuals.is_white_noise %}bg-emerald-100 text-emerald-800{% else %}bg-amber-100 text-amber-800{% endif %}">
+                                {% if r.q6_residuals.is_white_noise %}White Noise (Passed){% else %}Autocorrelated{% endif %}
+                            </span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Overlay Forecasts Chart -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-6 space-y-4">
+        <div class="pb-3 border-b border-slate-100">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="line-chart" class="w-4 h-4 text-indigo-600"></i>
+                <span>Overlay Forecast Projections Across Compared Runs</span>
+            </h3>
+        </div>
+        <div id="compare_chart" class="w-full h-80 rounded-xl bg-slate-50/50"></div>
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white rounded-2xl border border-slate-200/80 p-8">
+        <i data-lucide="git-compare" class="w-10 h-10 text-slate-300 mx-auto mb-2"></i>
+        <h3 class="text-sm font-bold text-slate-800">No runs to compare yet</h3>
+        <p class="text-xs text-slate-500 mb-4">Run Mode A on this dataset first to compare models side-by-side.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const cData = JSON.parse('{{ compare_json|escapejs }}');
+
+    const defaultLayout = {
+        margin: { t: 30, r: 20, b: 40, l: 50 },
+        hovermode: 'closest',
+        font: { family: 'Plus Jakarta Sans, sans-serif', size: 11, color: '#475569' },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        xaxis: { gridcolor: '#f1f5f9', zeroline: false },
+        yaxis: { gridcolor: '#f1f5f9', zeroline: false }
+    };
+
+    if (cData.runs && cData.runs.length) {
+        const traces = [];
+        const colors = ['#4f46e5', '#0284c7', '#10b981', '#f59e0b', '#ec4899'];
+
+        cData.runs.forEach((r, idx) => {
+            if (r.dates && r.dates.length) {
+                traces.push({
+                    x: r.dates,
+                    y: r.mean,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { width: 2, color: colors[idx % colors.length] },
+                    marker: { size: 5 },
+                    name: `${r.run_name} (${r.best_model} | RMSE ${r.rmse || 'N/A'})`
+                });
+            }
+        });
+
+        Plotly.newPlot('compare_chart', traces, {
+            ...defaultLayout,
+            xaxis: { ...defaultLayout.xaxis, title: 'Forecast Dates' },
+            yaxis: { ...defaultLayout.yaxis, title: 'Forecast Value' },
+            legend: { orientation: 'h', y: 1.15 }
+        }, { responsive: true, displayModeBar: false });
+    }
+</script>
+{% endblock %}
