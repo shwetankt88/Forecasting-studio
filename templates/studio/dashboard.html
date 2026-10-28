@@ -4,43 +4,62 @@
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Hero / Concept Banner -->
-    <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div class="absolute -right-12 -top-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute right-32 bottom-0 w-48 h-48 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
+    <!-- Hero Platform Banner -->
+    <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-slate-800">
+        <div class="absolute -right-12 -top-12 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-32 bottom-0 w-64 h-64 bg-sky-500/10 rounded-full blur-2xl pointer-events-none"></div>
         
         <div class="relative z-10 max-w-3xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-xs mb-4 border border-white/10">
-                <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
-                <span>Automated Time Series Analyst</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 text-xs font-semibold backdrop-blur-xs mb-3.5 border border-indigo-400/20">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Automated Econometric & Statistical Forecasting Engine</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-3">
-                Answers the questions that matter about any time series.
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white mb-3">
+                Decisive time series intelligence for complex operational data.
             </h1>
             <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-                Think of the app as an analyst who systematically answers 7 core questions for univariate series (decomposition, ADF stability, memory structure, model leaderboard, residual trust, and future range), and examines co-movement, Granger causality, and shock transmission across multivariate systems.
+                Ingest any time series to perform automated trend-seasonal decomposition, Augmented Dickey-Fuller stationarity tests, ACF/PACF memory identification, candidate model leaderboard ranking (AR, MA, ARMA, ARIMA, SARIMA), residual independence diagnostics, and calibrated 95% forecast intervals.
             </p>
             <div class="flex flex-wrap items-center gap-3">
-                {% if sample_count == 0 %}
-                <form action="{% url 'load_sample_datasets' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm transition-all shadow-lg shadow-emerald-500/25">
-                        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                        <span>Load Canonical India Benchmark Datasets</span>
-                    </button>
-                </form>
-                {% endif %}
-                <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/20 text-white font-semibold text-sm transition-all backdrop-blur-xs border border-white/10">
+                <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-md shadow-indigo-600/30">
                     <i data-lucide="upload" class="w-4 h-4"></i>
-                    <span>Upload CSV / Excel</span>
+                    <span>Upload Your Dataset</span>
+                </a>
+                <a href="#benchmarks" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-sm transition-all backdrop-blur-xs border border-white/10">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    <span>View Benchmark Series</span>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- The 2 Modes Breakdown Cards -->
+    <!-- Quick Stat Highlights -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Available Datasets</div>
+            <div class="text-2xl font-extrabold text-slate-900">{{ total_datasets }}</div>
+            <div class="text-xs text-slate-500 mt-0.5">Ready for modeling</div>
+        </div>
+        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Model Runs</div>
+            <div class="text-2xl font-extrabold text-slate-900">{{ total_runs }}</div>
+            <div class="text-xs text-slate-500 mt-0.5">Stored & reproducible</div>
+        </div>
+        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Evaluation Metric</div>
+            <div class="text-2xl font-extrabold text-indigo-600">Holdout RMSE</div>
+            <div class="text-xs text-slate-500 mt-0.5">Out-of-sample accuracy</div>
+        </div>
+        <div class="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">Uncertainty Standard</div>
+            <div class="text-2xl font-extrabold text-emerald-600">95% Range</div>
+            <div class="text-xs text-slate-500 mt-0.5">Risk-adjusted intervals</div>
+        </div>
+    </div>
+
+    <!-- Core Analytical Engines -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Mode A Card -->
+        <!-- Univariate Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-indigo-200 transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-4">
@@ -49,50 +68,50 @@
                     </div>
                     <span class="px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md bg-indigo-50 text-indigo-700">Mode A</span>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900 mb-2">Univariate Report Studio</h3>
+                <h3 class="text-lg font-bold text-slate-900 mb-1.5">Univariate Forecasting Suite</h3>
                 <p class="text-slate-600 text-xs sm:text-sm mb-4 leading-relaxed">
-                    Answers 7 foundational questions for a single series (e.g. Monthly India Electricity Demand):
+                    Automated single-metric modeling answering 7 fundamental analytical questions for reliable capacity planning and demand projections:
                 </p>
-                <div class="space-y-2 mb-6 text-xs text-slate-600">
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">1</span>
-                        <span>What does my data look like? (Stats, count, gaps)</span>
+                <div class="space-y-2 mb-6 text-xs text-slate-700">
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                        <span><strong>Data Inspection:</strong> Timeline trajectory, summary statistics, and gap detection.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">2</span>
-                        <span>What is it made of? (Trend, season & residual)</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                        <span><strong>Decomposition:</strong> Extraction of macro trend, seasonal cycles, and irregular residuals.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">3</span>
-                        <span>Is it stable or drifting? (ADF test, d & D recommendation)</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                        <span><strong>Stationarity Audit:</strong> Augmented Dickey-Fuller tests determining differencing order ($d, D$).</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">4</span>
-                        <span>How does it remember its past? (ACF/PACF Assistant)</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                        <span><strong>Memory Structure:</strong> ACF & PACF correlograms with automated pattern reading.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">5</span>
-                        <span>Which model fits best? (Holdout RMSE Leaderboard)</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">5</span>
+                        <span><strong>Model Leaderboard:</strong> Candidate grid (AR, MA, ARIMA, SARIMA) ranked by holdout RMSE.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">6</span>
-                        <span>Can I trust the model? (Residuals & Ljung-Box verdict)</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">6</span>
+                        <span><strong>Residual Diagnostics:</strong> Ljung-Box test verifying uncaptured autocorrelation.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-700 flex items-center justify-center text-[11px]">7</span>
-                        <span>What happens next? (95% uncertainty forecast & CSV)</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-50 text-indigo-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">7</span>
+                        <span><strong>Confidence Forecasts:</strong> Multi-step horizon projections with bounded 95% bands.</span>
                     </div>
                 </div>
             </div>
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-500 font-medium">AR, MA, ARMA, ARIMA, SARIMA</span>
-                <span class="text-xs font-semibold text-indigo-600 flex items-center gap-1">
-                    Select a dataset below <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
-                </span>
+                <span class="text-xs text-slate-500 font-mono">ARIMA / SARIMA / Holt-Winters</span>
+                <a href="#benchmarks" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                    Select a series below &darr;
+                </a>
             </div>
         </div>
 
-        <!-- Mode B Card -->
+        <!-- Multivariate Card -->
         <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-sky-200 transition-all flex flex-col justify-between">
             <div>
                 <div class="flex items-center justify-between mb-4">
@@ -101,55 +120,55 @@
                     </div>
                     <span class="px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-md bg-sky-50 text-sky-700">Mode B</span>
                 </div>
-                <h3 class="text-lg font-bold text-slate-900 mb-2">Multivariate VAR / VARMA Studio</h3>
+                <h3 class="text-lg font-bold text-slate-900 mb-1.5">Multivariate System Dynamics (VAR)</h3>
                 <p class="text-slate-600 text-xs sm:text-sm mb-4 leading-relaxed">
-                    Evaluates interconnected systems (Electricity, Temperature, Industrial Output, Renewables):
+                    Joint modeling for interconnected economic, energy, and climate variables to measure dynamic shock propagation:
                 </p>
-                <div class="space-y-2 mb-6 text-xs text-slate-600">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0"></i>
-                        <span><strong>Do they move together?</strong> Correlation matrix & co-movement</span>
+                <div class="space-y-2 mb-6 text-xs text-slate-700">
+                    <div class="flex items-start gap-2.5">
+                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0 mt-0.5"></i>
+                        <span><strong>Co-Movement & Correlation:</strong> Pearson correlation matrix and normalized time paths.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0"></i>
-                        <span><strong>Does A help predict B?</strong> Granger causality tests & verdicts</span>
+                    <div class="flex items-start gap-2.5">
+                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0 mt-0.5"></i>
+                        <span><strong>Granger Causality:</strong> Formal statistical testing to establish cross-variable predictive signals.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0"></i>
-                        <span><strong>How long does a shock last?</strong> Impulse response curves (IRF)</span>
+                    <div class="flex items-start gap-2.5">
+                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0 mt-0.5"></i>
+                        <span><strong>Impulse Response Functions (IRF):</strong> Orthogonal simulations of how shocks ripple through the system.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0"></i>
-                        <span><strong>What drives the uncertainty?</strong> Variance decomposition (FEVD)</span>
+                    <div class="flex items-start gap-2.5">
+                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0 mt-0.5"></i>
+                        <span><strong>Variance Decomposition (FEVD):</strong> Quantifies which variables drive long-term uncertainty.</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0"></i>
-                        <span><strong>Joint Forecasts:</strong> Multi-step paths for each series with 95% bands</span>
+                    <div class="flex items-start gap-2.5">
+                        <i data-lucide="check" class="w-4 h-4 text-sky-600 shrink-0 mt-0.5"></i>
+                        <span><strong>Joint Forecasts:</strong> Synchronized out-of-sample paths with compound prediction bands.</span>
                     </div>
                 </div>
             </div>
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-500 font-medium">Vector Autoregression (VAR & VARMA)</span>
-                <span class="text-xs font-semibold text-sky-600 flex items-center gap-1">
-                    Select a dataset below <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
-                </span>
+                <span class="text-xs text-slate-500 font-mono">Vector Autoregression (VAR & VARMA)</span>
+                <a href="#benchmarks" class="text-xs font-bold text-sky-600 hover:text-sky-800 flex items-center gap-1">
+                    Select a series below &darr;
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Datasets Section -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+    <div id="benchmarks" class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden scroll-mt-20">
         <div class="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
                     <i data-lucide="database" class="w-4 h-4 text-indigo-600"></i>
-                    <span>Available Datasets</span>
+                    <span>Available Datasets & Benchmarks</span>
                 </h2>
-                <p class="text-xs text-slate-500">Pick any dataset to run Mode A or Mode B analysis</p>
+                <p class="text-xs text-slate-500">Select any dataset to launch an automated univariate or multivariate forecast</p>
             </div>
             <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                <span>Add Dataset</span>
+                <span>Upload Custom Dataset</span>
             </a>
         </div>
 
@@ -163,8 +182,8 @@
                             {{ ds.name }}
                         </a>
                         {% if ds.is_sample %}
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            Canonical Sample
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            Verified Benchmark
                         </span>
                         {% endif %}
                     </div>
@@ -172,7 +191,7 @@
                     <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
                         <span class="inline-flex items-center gap-1">
                             <i data-lucide="table" class="w-3.5 h-3.5 text-slate-400"></i>
-                            {{ ds.rows_count }} observations
+                            {{ ds.rows_count }} records
                         </span>
                         <span>&bull;</span>
                         <span class="inline-flex items-center gap-1">
@@ -180,22 +199,22 @@
                             {{ ds.columns|length }} columns
                         </span>
                         <span>&bull;</span>
-                        <span>{{ ds.uploaded_at|date:"M d, Y" }}</span>
+                        <span>Format: <strong class="uppercase font-mono text-slate-700">{{ ds.file_type }}</strong></span>
                     </div>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
-                    <a href="{% url 'univariate_create' ds.pk %}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 text-xs font-semibold transition-colors">
+                    <a href="{% url 'univariate_create' ds.pk %}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-colors shadow-xs">
                         <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                        <span>Run Mode A (Univariate)</span>
+                        <span>Univariate Analysis</span>
                     </a>
                     {% if ds.columns|length >= 2 %}
-                    <a href="{% url 'multivariate_create' ds.pk %}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 text-xs font-semibold transition-colors">
+                    <a href="{% url 'multivariate_create' ds.pk %}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 text-xs font-semibold transition-colors">
                         <i data-lucide="network" class="w-3.5 h-3.5"></i>
-                        <span>Run Mode B (VAR)</span>
+                        <span>Multivariate VAR</span>
                     </a>
                     {% endif %}
-                    <a href="{% url 'dataset_detail' ds.pk %}" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Inspect details">
+                    <a href="{% url 'dataset_detail' ds.pk %}" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors" title="Inspect columns and preview">
                         <i data-lucide="chevron-right" class="w-4 h-4"></i>
                     </a>
                 </div>
@@ -205,29 +224,29 @@
         {% else %}
         <div class="text-center py-12 px-4">
             <i data-lucide="database" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
-            <h3 class="text-sm font-bold text-slate-700 mb-1">No datasets available</h3>
-            <p class="text-xs text-slate-500 mb-4">Click below to load the built-in benchmark datasets or upload your own.</p>
+            <h3 class="text-sm font-bold text-slate-700 mb-1">No datasets registered</h3>
+            <p class="text-xs text-slate-500 mb-4">Load the canonical benchmarks to explore the system immediately.</p>
             <form action="{% url 'load_sample_datasets' %}" method="post" class="inline">
                 {% csrf_token %}
                 <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition-colors">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                    <span>Load Built-in Benchmarks</span>
+                    <span>Load Benchmark Datasets</span>
                 </button>
             </form>
         </div>
         {% endif %}
     </div>
 
-    <!-- Recent Runs Split Grid -->
+    <!-- Recent Model Runs Table -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Univariate Runs -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
             <div class="p-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <i data-lucide="trending-up" class="w-4 h-4 text-indigo-600"></i>
-                    <span>Recent Mode A Analyses</span>
+                    <span>Recent Univariate Reports</span>
                 </h3>
-                <a href="{% url 'run_compare' %}" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Compare Runs &rarr;</a>
+                <a href="{% url 'run_compare' %}" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold">Compare Models &rarr;</a>
             </div>
             {% if univariate_runs %}
             <div class="divide-y divide-slate-100 text-xs">
@@ -235,10 +254,10 @@
                 <a href="{% url 'univariate_detail' r.pk %}" class="p-3.5 hover:bg-slate-50 flex items-center justify-between gap-3 transition-colors block">
                     <div class="space-y-0.5 min-w-0">
                         <div class="font-bold text-slate-900 truncate">{{ r.run_name }}</div>
-                        <div class="text-slate-500 truncate">{{ r.dataset.name }} &bull; {{ r.target_column }}</div>
+                        <div class="text-slate-500 truncate">{{ r.dataset.name }} &bull; Target: <span class="font-mono text-slate-700">{{ r.target_column }}</span></div>
                     </div>
                     <div class="text-right shrink-0">
-                        <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             {{ r.best_candidate.model_name|default:"Evaluated" }}
                         </span>
                         <div class="text-[10px] text-slate-400 mt-0.5">{{ r.created_at|timesince }} ago</div>
@@ -247,7 +266,7 @@
                 {% endfor %}
             </div>
             {% else %}
-            <div class="text-center py-8 text-xs text-slate-400">No univariate runs yet. Click "Run Mode A" on any dataset.</div>
+            <div class="text-center py-8 text-xs text-slate-400">No univariate runs yet. Select any dataset above to start.</div>
             {% endif %}
         </div>
 
@@ -256,7 +275,7 @@
             <div class="p-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <i data-lucide="network" class="w-4 h-4 text-sky-600"></i>
-                    <span>Recent Mode B VAR Systems</span>
+                    <span>Recent Multivariate Systems</span>
                 </h3>
             </div>
             {% if multivariate_runs %}
@@ -268,7 +287,7 @@
                         <div class="text-slate-500 truncate">{{ r.dataset.name }} &bull; {{ r.target_columns|join:", " }}</div>
                     </div>
                     <div class="text-right shrink-0">
-                        <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                        <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
                             {{ r.model_type }}(lag={{ r.lag_order }})
                         </span>
                         <div class="text-[10px] text-slate-400 mt-0.5">{{ r.created_at|timesince }} ago</div>

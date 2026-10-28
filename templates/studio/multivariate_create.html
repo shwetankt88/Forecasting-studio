@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Configure Mode B (VAR/VARMA) | {{ dataset.name }}{% endblock %}
+{% block title %}Configure Multivariate VAR System | {{ dataset.name }}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto space-y-6">
@@ -9,7 +9,7 @@
         <span>/</span>
         <a href="{% url 'dataset_detail' dataset.pk %}" class="hover:text-indigo-600 truncate max-w-xs">{{ dataset.name }}</a>
         <span>/</span>
-        <span class="text-slate-800 font-semibold">Mode B VAR Setup</span>
+        <span class="text-slate-800 font-semibold">New Multivariate System</span>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
@@ -17,11 +17,11 @@
             <div>
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-50 text-sky-700 text-xs font-bold uppercase tracking-wider mb-2">
                     <i data-lucide="network" class="w-3.5 h-3.5"></i>
-                    <span>Mode B Setup</span>
+                    <span>Multivariate VAR Setup</span>
                 </div>
                 <h1 class="text-xl font-bold text-slate-900 tracking-tight">Configure Multivariate Dynamic System</h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                    Select 2 or more interdependent time series. The engine estimates Vector Autoregression (VAR/VARMA), tests Granger causality ("Does A help predict B?"), computes Impulse Response Functions (IRF), and calculates Forecast Error Variance Decomposition (FEVD).
+                    Select 2 or more interdependent time series. The system will fit a Vector Autoregression (VAR/VARMA) model, test Granger causality, generate orthogonal impulse response functions, and compute forecast error variance decomposition.
                 </p>
             </div>
         </div>

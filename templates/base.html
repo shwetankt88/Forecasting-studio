@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Forecasting Studio{% endblock %} | Time Series Analyst</title>
+    <title>{% block title %}Forecasting Studio{% endblock %} | Automated Time Series Intelligence</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -26,7 +26,7 @@
     </script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Plotly.js CDN for high-performance interactive scientific charts -->
+    <!-- Plotly.js CDN for interactive scientific charts -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -42,7 +42,7 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-800">
 
     <!-- Top Navigation Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/95">
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs backdrop-blur-md bg-white/95">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Brand Logo -->
@@ -53,43 +53,43 @@
                         </div>
                         <div>
                             <span class="text-lg font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Forecasting Studio</span>
-                            <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[11px] font-semibold bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">Analyst Edition</span>
+                            <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700 rounded-md border border-slate-200">Production</span>
                         </div>
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <nav class="hidden md:flex items-center gap-1 font-medium text-sm text-slate-600">
-                    <a href="{% url 'dashboard' %}" class="px-3 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if request.resolver_match.url_name == 'dashboard' %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
+                    <a href="{% url 'dashboard' %}" class="px-3.5 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if request.resolver_match.url_name == 'dashboard' %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
                         Dashboard
                     </a>
-                    <a href="{% url 'dataset_list' %}" class="px-3 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if 'dataset' in request.resolver_match.url_name %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
+                    <a href="{% url 'dataset_list' %}" class="px-3.5 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if 'dataset' in request.resolver_match.url_name %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
                         Datasets
                     </a>
-                    <a href="{% url 'run_compare' %}" class="px-3 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if request.resolver_match.url_name == 'run_compare' %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
-                        Compare Runs
+                    <a href="{% url 'run_compare' %}" class="px-3.5 py-2 rounded-lg hover:text-indigo-600 hover:bg-slate-100 transition-colors {% if request.resolver_match.url_name == 'run_compare' %}text-indigo-600 bg-indigo-50/70 font-semibold{% endif %}">
+                        Model Comparison
                     </a>
                 </nav>
 
-                <!-- Quick Actions -->
+                <!-- Action Controls -->
                 <div class="flex items-center gap-2.5">
                     <form action="{% url 'load_sample_datasets' %}" method="post" class="inline">
                         {% csrf_token %}
-                        <button type="submit" title="Load Monthly India Electricity and Multivariate Macro samples" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-xs">
+                        <button type="submit" title="Reset or load official benchmark datasets" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors">
                             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i>
-                            <span>Load Samples</span>
+                            <span class="hidden sm:inline">Load</span> Benchmarks
                         </button>
                     </form>
                     <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200">
                         <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                        <span>Upload Data</span>
+                        <span>Upload Series</span>
                     </a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Global Notifications / Messages -->
+    <!-- Global Flash Alerts -->
     {% if messages %}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
         {% for message in messages %}
@@ -107,23 +107,23 @@
     </div>
     {% endif %}
 
-    <!-- Main Container -->
+    <!-- Main Viewport -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-slate-500 text-xs text-center">
+    <!-- Professional Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-slate-500 text-xs">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2">
-                <span class="font-bold text-slate-700">Forecasting Studio</span>
+                <span class="font-bold text-slate-800">Forecasting Studio</span>
                 <span>&bull;</span>
-                <span>Univariate (SARIMA) & Multivariate (VAR) Diagnostic Intelligence</span>
+                <span>Statistical Time Series Modeling & Decision Intelligence Platform</span>
             </div>
-            <div class="flex items-center gap-4 text-slate-400">
-                <span>Monthly India Electricity Benchmark Example</span>
+            <div class="flex items-center gap-3 text-slate-400 text-[11px]">
+                <span>ARIMA &bull; SARIMA &bull; VAR &bull; VARMA</span>
                 <span>&bull;</span>
-                <span>Django MVT + Statsmodels</span>
+                <span>Calibrated 95% Uncertainty Bands</span>
             </div>
         </div>
     </footer>

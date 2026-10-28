@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Configure Mode A Analysis | {{ dataset.name }}{% endblock %}
+{% block title %}Configure Univariate Forecast | {{ dataset.name }}{% endblock %}
 
 {% block content %}
 <div class="max-w-3xl mx-auto space-y-6">
@@ -9,7 +9,7 @@
         <span>/</span>
         <a href="{% url 'dataset_detail' dataset.pk %}" class="hover:text-indigo-600 truncate max-w-xs">{{ dataset.name }}</a>
         <span>/</span>
-        <span class="text-slate-800 font-semibold">Mode A Configuration</span>
+        <span class="text-slate-800 font-semibold">New Univariate Forecast</span>
     </div>
 
     <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-xs">
@@ -17,11 +17,11 @@
             <div>
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2">
                     <i data-lucide="trending-up" class="w-3.5 h-3.5"></i>
-                    <span>Mode A Setup</span>
+                    <span>Univariate Modeling</span>
                 </div>
-                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Configure Univariate Analytical Pipeline</h1>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Configure Univariate Forecasting Pipeline</h1>
                 <p class="text-xs sm:text-sm text-slate-500 mt-1">
-                    Select your target series and parameters. The engine will evaluate stationarity (ADF), memory structure (ACF/PACF), train a candidate leaderboard (AR, MA, ARMA, ARIMA, SARIMA), test residuals (Ljung-Box), and generate a 95% forecast band.
+                    Specify the timeline column, target variable, periodicity, and holdout validation horizon. The system will automatically execute stationarity checks, train a candidate leaderboard, diagnose residuals, and project 95% prediction intervals.
                 </p>
             </div>
         </div>
@@ -39,26 +39,26 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Analysis Run Name</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Model Run Name</label>
                     {{ form.run_name }}
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Date / Timestamp Column</label>
                     {{ form.date_column }}
-                    <p class="text-[11px] text-slate-400 mt-1">Column identifying observation timeline.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Timestamp index representing the series timeline.</p>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Target Series to Forecast</label>
                     {{ form.target_column }}
-                    <p class="text-[11px] text-slate-400 mt-1">The primary numerical variable.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Primary numerical observation to predict.</p>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Sampling Frequency</label>
                     {{ form.frequency }}
-                    <p class="text-[11px] text-slate-400 mt-1">Calendar frequency of the series.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Regular time step interval.</p>
                 </div>
 
                 <div>
@@ -70,21 +70,21 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Holdout Test Size</label>
                     {{ form.holdout_size }}
-                    <p class="text-[11px] text-slate-400 mt-1">Most recent points reserved to rank models on true out-of-sample RMSE.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Reserved most recent points for out-of-sample ground truth ranking.</p>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Forecast Horizon</label>
                     {{ form.forecast_horizon }}
-                    <p class="text-[11px] text-slate-400 mt-1">Steps forward into the unknown future with 95% bands.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Number of future time steps to project with 95% bands.</p>
                 </div>
             </div>
 
             <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600">
-                <i data-lucide="cpu" class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5"></i>
-                <div class="space-y-1">
-                    <div class="font-bold text-slate-800">What will happen when you click Run?</div>
-                    <p>The statistical engine will estimate decomposition (trend & seasonal strength), run ADF unit-root tests to determine differencing $d$ and $D$, calculate ACF/PACF with the Reading Assistant, fit the candidate grid, verify white noise residuals via Ljung-Box, and extrapolate the 95% prediction interval.</p>
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-indigo-600 shrink-0 mt-0.5"></i>
+                <div class="space-y-0.5">
+                    <div class="font-bold text-slate-800">Pipeline Execution Details</div>
+                    <p>Includes STL/Classical decomposition, Augmented Dickey-Fuller unit-root stationarity testing ($d, D$), memory correlograms, candidate model grid training (AR, MA, ARMA, ARIMA, SARIMA), residual Ljung-Box audit, and 95% uncertainty band extrapolation.</p>
                 </div>
             </div>
 
@@ -94,7 +94,7 @@
                 </a>
                 <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-200 transition-all">
                     <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                    <span>Execute Analysis & Generate Report</span>
+                    <span>Execute Forecast & Diagnostics</span>
                 </button>
             </div>
         </form>

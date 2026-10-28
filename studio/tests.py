@@ -13,8 +13,8 @@ class ForecastingStudioTests(TestCase):
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Forecasting Studio")
-        self.assertContains(response, "Univariate Report Studio")
-        self.assertContains(response, "Multivariate VAR")
+        self.assertContains(response, "Univariate Forecasting Suite")
+        self.assertContains(response, "Multivariate System Dynamics")
 
     def test_datasets_list_view(self):
         response = self.client.get(reverse('dataset_list'))
@@ -59,8 +59,8 @@ class ForecastingStudioTests(TestCase):
         self.assertContains(detail_res, "Which model fits best?")
         self.assertContains(detail_res, "Can I trust the model?")
         self.assertContains(detail_res, "What happens next?")
-        self.assertContains(detail_res, "Analyst Executive Summary")
-        self.assertContains(detail_res, "What This App Will NOT Tell You")
+        self.assertContains(detail_res, "Executive Forecast Brief")
+        self.assertContains(detail_res, "Model Governance & Decision Guardrails")
 
         # Test CSV export
         export_res = self.client.get(reverse('univariate_export', kwargs={'pk': run.pk}))

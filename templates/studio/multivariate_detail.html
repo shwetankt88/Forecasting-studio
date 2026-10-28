@@ -39,26 +39,29 @@
         </div>
     </div>
 
-    <!-- Top Card: Mode B Plain-Language Summary Box -->
-    <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 rounded-2xl p-6 sm:p-7 text-white shadow-lg border border-sky-800/40 relative overflow-hidden">
+    <!-- System Summary Box -->
+    <div class="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 rounded-2xl p-6 sm:p-7 text-white shadow-lg border border-slate-800 relative overflow-hidden">
         <div class="flex items-center gap-2 text-sky-300 text-xs font-bold uppercase tracking-wider mb-2.5">
             <i data-lucide="sparkles" class="w-4 h-4 text-sky-400"></i>
-            <span>Mode B System Insight Summary</span>
+            <span>System Dynamics Brief</span>
         </div>
         <p class="text-base sm:text-lg text-slate-100 font-medium leading-relaxed max-w-4xl">
-            &ldquo;{{ run.summary_text }}&rdquo;
+            {{ run.summary_text }}
         </p>
     </div>
 
-    <!-- Guardrails -->
+    <!-- Governance Guardrails -->
     <div class="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-5 text-amber-950 shadow-xs">
-        <div class="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-800 mb-3">
-            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
-            <span>Mode B Guardrails: What VAR Will NOT Tell You</span>
+        <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-800">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+                <span>Cross-Variable Assumptions & Decision Boundaries</span>
+            </div>
+            <span class="text-[11px] text-amber-700/80">Vector Autoregression constraints</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-amber-900/90">
             {% for warn in run.warnings %}
-            <div class="bg-white/80 p-3 rounded-xl border border-amber-200/60">
+            <div class="bg-white/80 p-3.5 rounded-xl border border-amber-200/60 shadow-2xs">
                 <div class="font-bold text-amber-950 mb-1 flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                     {{ warn.title }}

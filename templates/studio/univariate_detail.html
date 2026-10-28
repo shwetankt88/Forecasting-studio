@@ -45,14 +45,14 @@
         </div>
     </div>
 
-    <!-- TOP CARD: Plain-Language Summary Box -->
-    <div class="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-7 text-white shadow-lg border border-indigo-800/50 relative overflow-hidden">
+    <!-- Executive Summary Box -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-7 text-white shadow-lg border border-slate-800 relative overflow-hidden">
         <div class="flex items-center gap-2 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-2.5">
             <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-            <span>Analyst Executive Summary</span>
+            <span>Executive Forecast Brief</span>
         </div>
         <p class="text-base sm:text-lg text-slate-100 font-medium leading-relaxed max-w-4xl">
-            &ldquo;{{ run.summary_text }}&rdquo;
+            {{ run.summary_text }}
         </p>
         <div class="mt-4 pt-4 border-t border-indigo-800/60 flex flex-wrap items-center gap-4 text-xs text-indigo-200">
             <span class="inline-flex items-center gap-1">
@@ -62,19 +62,22 @@
             <span>&bull;</span>
             <span>Holdout RMSE: <strong class="text-white">{{ run.best_candidate.rmse|floatformat:2 }}</strong></span>
             <span>&bull;</span>
-            <span>Ljung-Box Verdict: <strong class="text-white">{% if run.q6_residuals.is_white_noise %}White Noise (Passed){% else %}Serial Correlation Warning{% endif %}</strong></span>
+            <span>Residual Diagnostic: <strong class="text-white">{% if run.q6_residuals.is_white_noise %}White Noise (Passed){% else %}Serial Correlation Flagged{% endif %}</strong></span>
         </div>
     </div>
 
-    <!-- What the app will NOT tell (State this in the UI) -->
+    <!-- Model Governance & Decision Guardrails -->
     <div class="bg-amber-50/70 border border-amber-200/90 rounded-2xl p-5 text-amber-950 shadow-xs">
-        <div class="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-800 mb-3">
-            <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
-            <span>Essential Analytical Guardrails: What This App Will NOT Tell You</span>
+        <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-amber-800">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600"></i>
+                <span>Model Governance & Decision Guardrails</span>
+            </div>
+            <span class="text-[11px] text-amber-700/80">Operational assumptions & risk boundaries</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs text-amber-900/90">
             {% for warn in run.warnings %}
-            <div class="bg-white/80 p-3 rounded-xl border border-amber-200/60">
+            <div class="bg-white/80 p-3.5 rounded-xl border border-amber-200/60 shadow-2xs">
                 <div class="font-bold text-amber-950 mb-1 flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                     {{ warn.title }}
@@ -270,11 +273,11 @@
             </span>
         </div>
 
-        <!-- The Reading Assistant Box -->
-        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-4.5 space-y-2">
+        <!-- Memory Structure & Pattern Identification -->
+        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200/90 rounded-xl p-4.5 space-y-2">
             <div class="flex items-center gap-2 text-purple-900 font-bold text-xs uppercase tracking-wider">
-                <i data-lucide="bot" class="w-4 h-4 text-purple-600"></i>
-                <span>ACF / PACF Reading Assistant Insights</span>
+                <i data-lucide="cpu" class="w-4 h-4 text-purple-600"></i>
+                <span>Automated Autocorrelation & Memory Profile</span>
             </div>
             <div class="space-y-1.5 text-xs text-purple-950">
                 {% for note in run.q4_acf_pacf.reading_notes %}

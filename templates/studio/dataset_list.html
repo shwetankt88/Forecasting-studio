@@ -14,12 +14,12 @@
                 {% csrf_token %}
                 <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors">
                     <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                    <span>Reload Benchmark Samples</span>
+                    <span>Reload Benchmark Series</span>
                 </button>
             </form>
             <a href="{% url 'dataset_upload' %}" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-xs">
                 <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-                <span>Upload New Dataset</span>
+                <span>Upload New Series</span>
             </a>
         </div>
     </div>
@@ -33,8 +33,8 @@
                         <a href="{% url 'dataset_detail' ds.pk %}">{{ ds.name }}</a>
                     </h3>
                     {% if ds.is_sample %}
-                    <span class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                        Sample
+                    <span class="shrink-0 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                        Benchmark
                     </span>
                     {% endif %}
                 </div>
@@ -62,11 +62,11 @@
                 </a>
                 <div class="flex items-center gap-1.5">
                     <a href="{% url 'univariate_create' ds.pk %}" class="px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors">
-                        Mode A
+                        Univariate
                     </a>
                     {% if ds.columns|length >= 2 %}
                     <a href="{% url 'multivariate_create' ds.pk %}" class="px-2.5 py-1 text-xs font-semibold rounded-md bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors">
-                        Mode B
+                        Multivariate VAR
                     </a>
                     {% endif %}
                 </div>

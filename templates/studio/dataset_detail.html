@@ -17,8 +17,8 @@
             <div class="flex items-center gap-3">
                 <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">{{ dataset.name }}</h1>
                 {% if dataset.is_sample %}
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                    Canonical Benchmark
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    Verified Benchmark
                 </span>
                 {% endif %}
             </div>
@@ -28,12 +28,12 @@
         <div class="flex flex-wrap items-center gap-2.5 shrink-0">
             <a href="{% url 'univariate_create' dataset.pk %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm shadow-indigo-200">
                 <i data-lucide="trending-up" class="w-4 h-4"></i>
-                <span>Mode A: Univariate Report</span>
+                <span>Univariate Forecast</span>
             </a>
             {% if dataset.columns|length >= 2 %}
             <a href="{% url 'multivariate_create' dataset.pk %}" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold transition-all shadow-sm shadow-sky-200">
                 <i data-lucide="network" class="w-4 h-4"></i>
-                <span>Mode B: Multivariate VAR</span>
+                <span>Multivariate VAR System</span>
             </a>
             {% endif %}
         </div>
